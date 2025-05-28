@@ -35,17 +35,37 @@ class Player {
         this.position.y += this.velocity.y;
         this.position.x += this.velocity.x;
 
-        if (this.position.y + this.height + this.velocity.y < canvas.height) {
+        if (this.position.y + this.height + this.velocity.y <= canvas.height) 
             this.velocity.y += gravity;
-        } else {
-            this.velocity.y = 0;
-            this.position.y = canvas.height - this.height;
+        else this.velocity.y = 0;
+    }
+}
+
+class Platform {
+    constructor() {
+        this.position = {
+            x: 200,
+            y: 150
         }
-        this.velocity.y += gravity;
+
+        this.width = 200
+        this.height = 20
+    }
+
+    draw() {
+        ctx.fillStyle = 'blue';
+        ctx.fillRect(
+            this.position.x,
+            this.position.y, 
+            this.width, 
+            this.height
+        )
     }
 }
 
 const player = new Player();
+const platform = new Platform();
+
 const keys = {
     right: {
         pressed: false
@@ -59,11 +79,22 @@ function animate() {
     requestAnimationFrame(animate);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     player.update();
+    platform.draw();
+
     if (keys.right.pressed) {
         player.velocity.x = 2;
     }else if (keys.left.pressed) {
         player.velocity.x = -2;
-    } else (player.velocity.x = 0);
+    } else player.velocity.x = 0;
+
+    // Platform collision detection
+    if (
+        player.position.y + player.height <= platform.position.y &&
+        player.position.y + player.height + player.velocity.y >= platform.position.y &&
+        player.position.x + player.width >= platform.position.x &&
+        player.position.x <= platform.position.x + platform.width) {
+        player.velocity.y = 0;
+    }
 }
 
 animate();
