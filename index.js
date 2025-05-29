@@ -42,10 +42,10 @@ class Player {
 }
 
 class Platform {
-    constructor() {
+    constructor({x, y}) {
         this.position = {
-            x: 200,
-            y: 150
+            x,
+            y
         }
 
         this.width = 200
@@ -64,7 +64,19 @@ class Platform {
 }
 
 const player = new Player();
-const platform = new Platform();
+const platforms = [
+    new Platform({
+        x: 200,
+        y: 100
+    }), 
+    new Platform({
+        x: 400,
+        y: 300
+    }), 
+    new Platform({
+        x: 300,
+        y: 200
+    })];
 
 const keys = {
     right: {
@@ -79,22 +91,39 @@ function animate() {
     requestAnimationFrame(animate);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     player.update();
-    platform.draw();
+    platforms.forEach(platform => {
+        platform.draw();
+    });
 
-    if (keys.right.pressed) {
-        player.velocity.x = 2;
-    }else if (keys.left.pressed) {
-        player.velocity.x = -2;
-    } else player.velocity.x = 0;
+    if (keys.right.pressed && player.position.x < 400) {
+        player.velocity.x = 5;
+    }else if (keys.left.pressed && player.position.x >100) {
+        player.velocity.x = -5;
+    } else {
+        player.velocity.x = 0;
+
+        if (keys.right.pressed) {
+            platforms.forEach(platform => {
+        platform.draw();
+        platform.position.x -= 5;
+            });
+        } else if (keys.left.pressed) {
+            platforms.forEach(platform => {
+                platform.draw();
+                platform.position.x += 5;
+            });        }
+    };
 
     // Platform collision detection
-    if (
-        player.position.y + player.height <= platform.position.y &&
-        player.position.y + player.height + player.velocity.y >= platform.position.y &&
-        player.position.x + player.width >= platform.position.x &&
-        player.position.x <= platform.position.x + platform.width) {
-        player.velocity.y = 0;
-    }
+    platforms.forEach(platform => {
+        if (
+            player.position.y + player.height <= platform.position.y &&
+            player.position.y + player.height + player.velocity.y >= platform.position.y &&
+            player.position.x + player.width >= platform.position.x &&
+            player.position.x <= platform.position.x + platform.width) {
+            player.velocity.y = 0;
+        }
+    });
 }
 
 animate();
@@ -104,7 +133,6 @@ addEventListener('keydown', ({ keyCode }) => {
         case 81:
             console.log('left');
             keys.left.pressed = true;
-            player.velocity.x = -2;
             break;
         case 83:
             console.log('down');
@@ -112,7 +140,6 @@ addEventListener('keydown', ({ keyCode }) => {
         case 68:
             console.log('right');
             keys.right.pressed = true;
-            player.velocity.x = 2;
             break;
         case 90:
             console.log('up');
@@ -125,7 +152,6 @@ addEventListener('keyup', ({ keyCode }) => {
         case 81:
             console.log('left');
             keys.left.pressed = false;
-            player.velocity.x = 0;
             break;
         case 83:
             console.log('down');
@@ -133,11 +159,13 @@ addEventListener('keyup', ({ keyCode }) => {
         case 68:
             console.log('right');
             keys.right.pressed = false;
-            player.velocity.x = 0;
             break;
         case 90:
             console.log('up');
             player.velocity.y -= 0;
             break;
+        case 32:
+            console.log('hit');
+            break
     }
 })
